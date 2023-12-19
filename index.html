@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAS - Disease Detection System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="project-heading">Agricultural Assistance System(AAS)</h1>
+        <h2 class="subtitle">Disease Detection System</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="imageInput" class="upload-label">Upload an image:</label>
+            <input type="file" id="imageInput" accept="image/*" />
+            <button type="button" onclick="uploadImage()">Detect Disease</button>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
