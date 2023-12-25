@@ -6,7 +6,7 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 50px auto;
     background-color: #fff;
     padding: 20px;
@@ -53,12 +53,20 @@ input[type="file"] {
     box-sizing: border-box;
 }
 
+.canvas-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
 canvas {
-    margin-bottom: 15px; /* Add space below the canvas */
+    border: 1px solid #ccc; /* Set the border color for both canvases */
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 button {
-    background-color: #4caf50;
+    background-color: #66bb6a; /* Set the button background color to green (#4caf50) */
     color: #fff;
     padding: 12px 20px;
     border: none;

@@ -1,5 +1,7 @@
 const canvas = document.getElementById('imageCanvas');
 const ctx = canvas.getContext('2d');
+const croppedCanvas = document.getElementById('croppedCanvas');
+const croppedCtx = croppedCanvas.getContext('2d');
 let drawing = false;
 let bbox = {};
 
@@ -36,10 +38,33 @@ function draw(e) {
     drawImageOnCanvas();
 }
 
+function drawCroppedImage() {
+    const input = document.getElementById('imageInput');
+    const file = input.files[0];
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = new Image();
+            img.onload = function () {
+                // Draw the cropped region on the second canvas
+                croppedCtx.fillStyle = '#FFFFFF'; // Set fill color to white
+                croppedCtx.fillRect(0, 0, croppedCanvas.width, croppedCanvas.height); // Fill the canvas with white
+                croppedCtx.drawImage(img, bbox.x, bbox.y, bbox.width, bbox.height, 0, 0, croppedCanvas.width, croppedCanvas.height);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
 function stopDrawing() {
     drawing = false;
     // Update the hidden input field with the bounding box coordinates
     document.getElementById('bbox').value = `${bbox.x},${bbox.y},${bbox.width},${bbox.height}`;
+    
+    // Draw the cropped region on the second canvas
+    drawCroppedImage();
 }
 
 function drawImageOnCanvas() {
@@ -111,4 +136,7 @@ function uploadImage() {
         resultElement.classList.add('result-visible');
     })
     .catch(error => console.error('Error:', error));
+
+    // Draw the original image on the canvas immediately after uploading
+    drawImageOnCanvas();
 }
