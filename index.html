@@ -13,6 +13,8 @@
         <form id="uploadForm" enctype="multipart/form-data">
             <label for="imageInput" class="upload-label">Upload an image:</label>
             <input type="file" id="imageInput" accept="image/*" />
+            <canvas id="imageCanvas" width="224" height="224" style="border:1px solid #000;"></canvas>
+            <input type="hidden" id="bbox" name="bbox" value="">
             <button type="button" onclick="uploadImage()">Detect Disease</button>
         </form>
         <div id="result" class="result"></div>

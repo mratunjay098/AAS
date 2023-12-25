@@ -53,6 +53,10 @@ input[type="file"] {
     box-sizing: border-box;
 }
 
+canvas {
+    margin-bottom: 15px; /* Add space below the canvas */
+}
+
 button {
     background-color: #4caf50;
     color: #fff;

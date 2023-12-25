@@ -12,7 +12,7 @@ CORS(app)
 model = load_model('models/nonSegmented/ResNet50.h5')
 
 def get_class_name(predicted_class):
-    class_names = [
+    class_names = [ 
         'Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy',
         'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___healthy',
         'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot', 'Corn_(maize)___Common_rust_',
@@ -33,18 +33,25 @@ def get_class_name(predicted_class):
     else:
         return f'Unknown Class (Index: {predicted_class})'
 
-
 @app.route('/api/predict', methods=['POST'])
-
 def predict():
     if 'image' not in request.files:
         return jsonify({'error': 'No image provided'})
 
+    # Get the bounding box coordinates from the request (you need to adjust this part based on your frontend implementation)
+    x, y, width, height = map(float, request.form.get('bbox').split(','))
+
     image = request.files['image']
     img = Image.open(image).resize((224, 224))  # Adjust size according to your model
-    img_array = np.expand_dims(img, axis=0)  # Add batch dimension
 
-    prediction = model.predict(img_array)
+    # Apply segmentation using the bounding box
+    segmented_image = img.crop((x, y, x + width, y + height)).resize((224, 224))
+
+    # Convert segmented image to numpy array for classification
+    segmented_img_array = np.expand_dims(np.array(segmented_image), axis=0)
+
+    # Perform classification on the cropped image
+    prediction = model.predict(segmented_img_array)
     predicted_class = np.argmax(prediction)
 
     class_name = get_class_name(predicted_class)
