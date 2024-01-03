@@ -13,6 +13,11 @@
         <form id="uploadForm" enctype="multipart/form-data">
             <label for="imageInput" class="upload-label">Upload an image:</label>
             <input type="file" id="imageInput" accept="image/*" />
+            <div class="canvas-container">
+                <canvas id="imageCanvas" width="224" height="224"></canvas>
+                <canvas id="croppedCanvas" width="224" height="224" style="border: 1px solid #000;"></canvas>
+            </div>
+            <input type="hidden" id="bbox" name="bbox" value="">
             <button type="button" onclick="uploadImage()">Detect Disease</button>
         </form>
         <div id="result" class="result"></div>
