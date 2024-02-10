@@ -24,7 +24,7 @@ To set up the Agricultural Assistance System locally, follow these steps:
 1. Open the web application in your browser.
 2. Upload an image of a plant affected by a disease.
 3. Draw a bounding box around the diseased area.
-4. Click on the "Detect Disease" button to initiate the disease detection process.
+4. Click the "Detect Disease" button to initiate the disease detection process.
 5. View the classification result and segmented image on the interface.
 
 ## License
