@@ -198,3 +198,4 @@ function processAndUploadImage() {
     // Draw the original image on the canvas immediately after uploading
     drawImageOnCanvas();
 }
+
