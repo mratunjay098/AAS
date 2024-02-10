@@ -11,8 +11,8 @@ let animationFrameId;
 
 // Event listeners for drawing bounding box
 canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
+document.addEventListener('mousemove', draw);
+document.addEventListener('mouseup', stopDrawing);
 
 function startDrawing(e) {
     drawing = true;
@@ -31,20 +31,16 @@ function startDrawing(e) {
 function draw(e) {
     if (!drawing) return;
 
-    // Use requestAnimationFrame for smoother rendering
-    cancelAnimationFrame(animationFrameId);
-    animationFrameId = requestAnimationFrame(() => {
-        const rect = canvas.getBoundingClientRect();
-        bbox.width = e.clientX - rect.left - bbox.x;
-        bbox.height = e.clientY - rect.top - bbox.y;
+    const rect = canvas.getBoundingClientRect();
+    bbox.width = e.clientX - rect.left - bbox.x;
+    bbox.height = e.clientY - rect.top - bbox.y;
 
-        // Clear canvas and draw bounding box
-        clearCanvas();
-        drawBoundingBox();
+    // Clear canvas and draw bounding box
+    clearCanvas();
+    drawBoundingBox();
 
-        // Draw the selected image on the canvas
-        drawImageOnCanvas();
-    });
+    // Draw the selected image on the canvas
+    drawImageOnCanvas();
 }
 
 function drawCroppedImage() {
@@ -56,10 +52,22 @@ function drawCroppedImage() {
         reader.onload = function (e) {
             const img = new Image();
             img.onload = function () {
-                // Draw the cropped region on the second canvas
-                croppedCtx.fillStyle = '#FFFFFF'; // Set fill color to white
-                croppedCtx.fillRect(0, 0, croppedCanvas.width, croppedCanvas.height); // Fill the canvas with white
-                croppedCtx.drawImage(img, bbox.x, bbox.y, bbox.width, bbox.height, 0, 0, croppedCanvas.width, croppedCanvas.height);
+                // Clear the canvas
+                croppedCtx.clearRect(0, 0, croppedCanvas.width, croppedCanvas.height);
+
+                // Fill the canvas with black
+                croppedCtx.fillStyle = '#000000'; // Set fill color to black
+                croppedCtx.fillRect(0, 0, croppedCanvas.width, croppedCanvas.height); // Fill the canvas with black
+
+                // Draw the cropped region on the second canvas within the bounding box area
+                croppedCtx.drawImage(
+                    img,
+                    bbox.x, bbox.y, bbox.width, bbox.height, // Source rectangle (cropped region)
+                    bbox.x, bbox.y, bbox.width, bbox.height // Destination rectangle (within bounding box)
+                );
+                
+                // Draw the rest of the image into only the bounding box region, and rest will be black only
+                drawImageOnCanvas();
             };
             img.src = e.target.result;
         };
@@ -71,7 +79,6 @@ function stopDrawing() {
     drawing = false;
     // Update the hidden input field with the bounding box coordinates
     document.getElementById('bbox').value = `${bbox.x},${bbox.y},${bbox.width},${bbox.height}`;
-    
     // Draw the cropped region on the second canvas
     drawCroppedImage();
 }
@@ -103,9 +110,20 @@ function clearCanvas() {
 }
 
 function drawBoundingBox() {
+    const x1 = bbox.x;
+    const y1 = bbox.y;
+    const x2 = bbox.x + bbox.width;
+    const y2 = bbox.y + bbox.height;
+
     ctx.strokeStyle = '#FF0000';
     ctx.lineWidth = 2;
-    ctx.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x1, y2);
+    ctx.closePath();
+    ctx.stroke();
 }
 
 function processAndUploadImage() {
