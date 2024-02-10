@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Load the pre-trained classification model
-model = load_model('models/nonSegmented/ResNet50.h5')
+model = load_model('models/segmented/ResNet50.h5')
 
 # Load the segmentation model
 CHECKPOINT_PATH = "sam_vit_h_4b8939.pth"
