@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from tensorflow.keras.models import load_model
 from io import BytesIO
+import matplotlib
+import matplotlib.pyplot as plt
 import os
 from PIL import Image
 import numpy as np
@@ -9,6 +11,7 @@ import base64
 from segment_anything import sam_model_registry, SamPredictor
 import torch
 import cv2
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -54,12 +57,17 @@ def process_image():
     try:
         if 'image' not in request.files:
             return jsonify({'error': 'No image provided'}) 
-        
+
+        seg_start_time = time.time()
+
         # Get the image file from the POST request
         image_data = request.files['image']
-
-        image_bgr = Image.open(image_data)
-        image_rgb = cv2.cvtColor(np.array(image_bgr), cv2.COLOR_BGR2RGB)
+        print(image_data)
+        nparr = np.fromstring(image_data.read(), np.uint8)
+        image_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        # # image_bgr = Image.open(image_data)
+        # image_rgb = cv2.cvtColor(np.array(image_bgr), cv2.COLOR_BGR2RGB)
+        # cv2.imwrite('image_to_be_segmented.jpg', image_rgb)
         
         # Get the bounding box coordinates from the request (you need to adjust this part based on your frontend implementation)
         x, y, width, height = map(float, request.form.get('bbox').split(','))
@@ -72,34 +80,41 @@ def process_image():
             box['x'] + box['width'],
             box['y'] + box['height']
         ])
-
         # Perform segmentation
-        mask_predictor.set_image(image_rgb)
+        mask_predictor.set_image(image_bgr)
         masks, scores, logits = mask_predictor.predict(
             box=box,
             multimask_output=True
         )
 
         # Apply segmentation mask to the original image
-        roi = image_rgb.copy()
+        roi = image_bgr.copy()
         largest_mask_index = np.argmax([np.sum(mask) for mask in masks])
+        print(largest_mask_index)
         largest_mask = masks[largest_mask_index]
-        largest_mask_resized = cv2.resize(largest_mask.astype(bool).astype(np.uint8), (roi.shape[1], roi.shape[0]))
-        print("largest " , largest_mask_index)
-        
-        roi[~largest_mask_resized] = 0
-        
-        print(roi)
+        # largest_mask_resized = cv2.resize(largest_mask.astype(bool).astype(np.uint8), (roi.shape[1], roi.shape[0]))
+        # roi[~largest_mask_resized] = 0
+        roi[~largest_mask.astype(bool)] = 0
+
+        # Save the segmented image roi
+        segmented_image_path = 'segmented_roi.jpg'
+        # cv2.imwrite(segmented_image_path, cv2.cvtColor(roi, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(segmented_image_path, roi)
 
         # Convert segmented image to base64 string
-        _, encoded_image = cv2.imencode('.jpg', cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
+        # _, encoded_image = cv2.imencode('.jpg', cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
+        _, encoded_image = cv2.imencode('.jpg', roi)       
         segmented_image_base64 = base64.b64encode(encoded_image).decode('utf-8')
-        
-        print(segmented_image_base64)
+
+        seg_end_time = time.time()
+        print('Segmentation Time: ', (seg_end_time-seg_start_time))
 
         # Perform classification on the segmented image
         classification_result = classify_segmented_image(roi)
         
+        class_end_time = time.time()
+        print('Classification Time: ', (class_end_time-seg_end_time))
+
         result = {'success': True, 'segmented_image': segmented_image_base64, 'classification_result': classification_result}
 
         return jsonify(result)

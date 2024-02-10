@@ -74,9 +74,6 @@ function stopDrawing() {
     
     // Draw the cropped region on the second canvas
     drawCroppedImage();
-
-    // Request the segmented image from the server
-    requestSegmentedImage();
 }
 
 function drawImageOnCanvas() {
@@ -111,73 +108,13 @@ function drawBoundingBox() {
     ctx.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height);
 }
 
-function requestSegmentedImage() {
+function processAndUploadImage() {
     const input = document.getElementById('imageInput');
     const file = input.files[0];
 
     const formData = new FormData();
     formData.append('image', file);
     formData.append('bbox', document.getElementById('bbox').value);
-
-    // Request the segmented image from the server using the correct endpoint (/process)
-    fetch('http://localhost:5000/process', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Response from server:', data);
-          
-        if (data.success) {
-            // Display the segmented image on the third canvas
-            const img = new Image();
-            img.onload = function () {
-                // Clear the third canvas before drawing the new image
-                segmentedCtx.clearRect(0, 0, segmentedCanvas.width, segmentedCanvas.height);
-    
-                // Draw the segmented image
-                segmentedCtx.drawImage(img, 0, 0, segmentedCanvas.width, segmentedCanvas.height);
-            };
-            img.src = 'data:image/jpeg;base64,' + data.segmented_image;
-    
-            // Display classification result here
-            const resultElement = document.getElementById('result');
-            resultElement.innerHTML = ''; // Clear previous result
-            resultElement.classList.remove('result-visible');
-
-            // Check if classification result is defined and successful
-            if (data.classification_result && data.classification_result.success) {
-                console.log('Predicted Class Index:', data.classification_result.predictedClass);
-                console.log('Predicted Class Name:', data.classification_result.className);
-                
-                // Create elements to display the classification result
-                const classResult = document.createElement('div');
-                classResult.innerHTML = `Predicted Class Index: ${data.classification_result.predictedClass}`;
-
-                if (data.classification_result.className) {
-                    const classNameResult = document.createElement('div');
-                    classNameResult.innerHTML = `Predicted Class Name: ${data.classification_result.className}`;
-                    resultElement.appendChild(classNameResult);
-                }
-
-                resultElement.appendChild(classResult);
-                resultElement.classList.add('result-visible');
-            } else {
-                console.error('Classification error:', data.classification_result.error);
-            }
-        } else {
-            console.error('Error:', data.error);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function uploadImage() {
-    const input = document.getElementById('imageInput');
-    const file = input.files[0];
-
-    const formData = new FormData();
-    formData.append('image', file);
 
     // Clear previous result
     const resultElement = document.getElementById('result');
@@ -191,7 +128,6 @@ function uploadImage() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data)
         const classResult = document.createElement('div');
 
         // Display predicted class index
@@ -206,9 +142,46 @@ function uploadImage() {
 
         resultElement.appendChild(classResult);
         resultElement.classList.add('result-visible');
+
+        // Display the segmented image on the third canvas
+        const img = new Image();
+        img.onload = function () {
+            // Clear the third canvas before drawing the new image
+            segmentedCtx.clearRect(0, 0, segmentedCanvas.width, segmentedCanvas.height);
+
+            // Draw the segmented image
+            segmentedCtx.drawImage(img, 0, 0, segmentedCanvas.width, segmentedCanvas.height);
+        };
+        img.src = 'data:image/jpeg;base64,' + data.segmented_image;
+
+        // Check if classification result is defined and successful
+        if (data.classification_result && data.classification_result.success) {
+            console.log('Predicted Class Index:', data.classification_result.predictedClass);
+            console.log('Predicted Class Name:', data.classification_result.className);
+
+            // Create elements to display the classification result
+            const classResult = document.createElement('div');
+            classResult.innerHTML = `Predicted Class Index: ${data.classification_result.predictedClass}`;
+
+            if (data.classification_result.className) {
+                const classNameResult = document.createElement('div');
+                classNameResult.innerHTML = `Predicted Class Name: ${data.classification_result.className}`;
+                resultElement.appendChild(classNameResult);
+            }
+
+            resultElement.appendChild(classResult);
+            resultElement.classList.add('result-visible');
+        } else {
+            console.error('Classification error:', data.classification_result.error);
+        }
     })
     .catch(error => console.error('Error:', error));
 
     // Draw the original image on the canvas immediately after uploading
     drawImageOnCanvas();
 }
+
+// function uploadImage() {
+//     // Just call processAndUploadImage() function instead, since it performs both processing and uploading
+//     processAndUploadImage();
+// }
