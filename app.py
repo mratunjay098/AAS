@@ -65,9 +65,6 @@ def process_image():
         print(image_data)
         nparr = np.fromstring(image_data.read(), np.uint8)
         image_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        # # image_bgr = Image.open(image_data)
-        # image_rgb = cv2.cvtColor(np.array(image_bgr), cv2.COLOR_BGR2RGB)
-        # cv2.imwrite('image_to_be_segmented.jpg', image_rgb)
         
         # Get the bounding box coordinates from the request (you need to adjust this part based on your frontend implementation)
         x, y, width, height = map(float, request.form.get('bbox').split(','))
@@ -92,17 +89,13 @@ def process_image():
         largest_mask_index = np.argmax([np.sum(mask) for mask in masks])
         print(largest_mask_index)
         largest_mask = masks[largest_mask_index]
-        # largest_mask_resized = cv2.resize(largest_mask.astype(bool).astype(np.uint8), (roi.shape[1], roi.shape[0]))
-        # roi[~largest_mask_resized] = 0
         roi[~largest_mask.astype(bool)] = 0
 
         # Save the segmented image roi
         segmented_image_path = 'segmented_roi.jpg'
-        # cv2.imwrite(segmented_image_path, cv2.cvtColor(roi, cv2.COLOR_RGB2BGR))
         cv2.imwrite(segmented_image_path, roi)
 
         # Convert segmented image to base64 string
-        # _, encoded_image = cv2.imencode('.jpg', cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
         _, encoded_image = cv2.imencode('.jpg', roi)       
         segmented_image_base64 = base64.b64encode(encoded_image).decode('utf-8')
 
