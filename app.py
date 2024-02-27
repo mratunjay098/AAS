@@ -101,7 +101,7 @@ def process_image():
 
         seg_end_time = time.time()
         print('Segmentation Time: ', (seg_end_time-seg_start_time))
-        print('Check')
+        
         # Perform classification on the segmented image
         classification_result = classify_segmented_image(roi)
         
