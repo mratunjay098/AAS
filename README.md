@@ -6,7 +6,7 @@ Agricultural Assistance System (AAS) is a Disease Detection System designed to a
 
 - **Image Upload**: Users can upload images of plants affected by diseases.
 - **Bounding Box Selection**: Users can draw bounding boxes around the region of interest in the uploaded images.
-- **Segmentation**: The system performs segmentation on the selected region to isolate the diseased areas.
+- **Segmentation**: The system segments the selected region to isolate the diseased areas.
 - **Classification**: The segmented region are then classified to identify the type of disease present.
 - **Real-time Feedback**: In future, The system will provide real-time feedback on the predicted disease type.
 
@@ -24,16 +24,8 @@ To set up the Agricultural Assistance System locally, follow these steps:
 1. Open the web application in your browser.
 2. Upload an image of a plant affected by a disease.
 3. Draw a bounding box around the diseased area.
-4. Click on the "Detect Disease" button to initiate the disease detection process.
+4. Click the "Detect Disease" button to initiate the disease detection process.
 5. View the classification result and segmented image on the interface.
-
-## Inference
-
-![Agricultural Assistance System]('images/p_final.png')
-
-## Contributors
-
-- [Mratunjay Singh](https://github.com/mratunjay098)
 
 ## License
 
